@@ -41,6 +41,8 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getAllProducts());
     }
 
+
+
     // ✅ Add product
    @PostMapping("/add")
     public ResponseEntity<ProductUser> addProduct(@RequestBody ProductUser productUser) {
@@ -71,7 +73,17 @@ public class InventoryController {
             inventoryService.saleProduct(id, saleRequest.getQuantity(), saleRequest.getProductPrice());
             return "✅Sale recorded successfully!";
    }
- }
+    @PutMapping("/update-price/{id}")
+    public ResponseEntity<String> updateProductPrice(
+            @PathVariable Long id,
+            @RequestParam double newPrice) {
+
+        inventoryService.updateAllProductPrice(id, newPrice);
+        return ResponseEntity.ok("Product price updated successfully!");
+    }
+
+}
+
 
     
 

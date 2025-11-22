@@ -10,9 +10,8 @@ public class AgencyApplication {
 		SpringApplication.run(AgencyApplication.class, args);
 		System.out.println("Inventory Application is Running");
 
-		
+
 
 
 	}
-
 }

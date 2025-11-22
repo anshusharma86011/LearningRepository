@@ -41,6 +41,10 @@ public class InventoryService {
 
       // ✅ Add a product
     public ProductUser addProduct(ProductUser productUser) {
+
+        // Recalculate total price
+        double total = productUser.getProductPrice() * productUser.getProductStock();
+        productUser.setTotalPrice(total);
         return productRepo.save(productUser);
     }
 
@@ -73,7 +77,21 @@ public class InventoryService {
             SaleUser sale = new SaleUser (quantity, LocalDate.now(), sellingPrice, product);
             saleRepo.save(sale);
         }
+    }   
+    // ✅ Update a product-Price
+    public void updateAllProductPrice(Long id, double newPrice) {
+        ProductUser product = productRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // update price
+        product.setProductPrice(newPrice);
+
+        // Recalculate total price
+        double total = product.getProductPrice() * product.getProductStock();
+        product.setTotalPrice(total);
+
+
+        //save update product
+        productRepo.save(product);
     }
-
-
 }

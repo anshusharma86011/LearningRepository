@@ -25,34 +25,36 @@ public class JwtHelper {
     // 🔐 Token validity (in milliseconds) → 10 hours
     private final long JWT_EXPIRATION = 1000 * 60 * 60 * 10;
 
-  public String generateToken(UserEntity userDetails) {
+    public String generateToken(UserEntity userDetails) {
+        Map<String, Object> claims = new HashMap<>();
 
-    Map<String, Object> claims = new HashMap<>();
+        // Add your custom fields
+        claims.put("userId", userDetails.getId());
+        claims.put("username", userDetails.getUsername());
+        claims.put("role", userDetails.getRole());
 
-    // Add your custom fields
-    claims.put("userId", userDetails.getId());
-    claims.put("username", userDetails.getUsername());
-    claims.put("role", userDetails.getRole());
+        // // Token expiry like your example
+        // long expiryTime = rememberMe
+        //         ? 1000L * 60 * 60 * 24 * 30   // 30 days
+        //         : 1000L * 60 * 60 * 12;       // 12 hours
 
-    // Token expiry like your example
-    // long expiryTime = rememberMe
-    //         ? 1000L * 60 * 60 * 24 * 30   // 30 days
-    //         : 1000L * 60 * 60 * 12;       // 12 hours
-
-    return createToken(claims, userDetails.getUsername());
-}
-
+        return createToken(claims, userDetails.getUsername());
+    }
 
 
-private String createToken(Map<String, Object> claims, String subject) {
-    return Jwts.builder()
-            .setClaims(claims)
-            .setSubject(subject) // username
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            // .setExpiration(new Date(System.currentTimeMillis() + expiryTime))
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-            .compact();
-}
+    private String createToken(Map<String, Object> claims, String subject) {
+
+        Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());  // Correct secure key
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
+                .signWith(key, SignatureAlgorithm.HS256)       // Correct signing
+                .compact();
+    }
+
 
 
 
