@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.springboottest.agency.Entity.UserEntity;
 import com.springboottest.agency.Service.UserService;
 
-@RequestMapping("user")
+@RequestMapping("/user")
 @RestController
 public class UserController {
 

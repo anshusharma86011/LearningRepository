@@ -31,7 +31,7 @@ public class JwtHelper {
         // Add your custom fields
         claims.put("userId", userDetails.getId());
         claims.put("username", userDetails.getUsername());
-        claims.put("role", userDetails.getRole());
+       // claims.put("role", userDetails.getRole());
 
         // // Token expiry like your example
         // long expiryTime = rememberMe

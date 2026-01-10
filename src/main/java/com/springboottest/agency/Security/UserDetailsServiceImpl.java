@@ -3,6 +3,7 @@ package com.springboottest.agency.Security;
 import com.springboottest.agency.Entity.UserEntity;
 import com.springboottest.agency.Repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("User not found: " + username);
         }
 
+        // return org.springframework.security.core.userdetails.User
+        //         .withUsername(user.getUsername())
+        //         .password(user.getPassword())    // must be encrypted in real project
+        //         .roles(user.getRole())
+        //         .build();
+
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())    // must be encrypted in real project
-                .roles(user.getRole())
-                .build();
+        .withUsername(user.getUsername())
+        .password(user.getPassword())
+        .authorities(
+            new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase())
+        )
+        .build();
     }
 }

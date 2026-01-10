@@ -2,8 +2,6 @@ package com.springboottest.agency.Entity;
 
 
 import jakarta.persistence.*;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

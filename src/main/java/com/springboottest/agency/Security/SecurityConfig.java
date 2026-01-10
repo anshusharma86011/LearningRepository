@@ -20,50 +20,63 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtHelper jwtHelper;
-    private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // ✅ Constructor injection with @Lazy to break circular dependency
+    // ✅ Constructor Injection (CLEAN & CORRECT)
     public SecurityConfig(
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-            JwtHelper jwtHelper,
-            @Lazy org.springframework.security.core.userdetails.UserDetailsService userDetailsService
+            JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.jwtHelper = jwtHelper;
-        this.userDetailsService = userDetailsService;
-    }
-
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtHelper, userDetailsService);
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
+            // ❌ Disable CSRF (JWT = Stateless)
             .csrf(csrf -> csrf.disable())
+
+            // ❌ Disable session (JWT = Stateless)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // ✅ Authorization rules
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/user/**").permitAll()
-                .requestMatchers("/inventory/**").authenticated()
+                .requestMatchers(
+                    "/auth/**",
+                    "/user/**"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            // ❗ Custom 401 handler
+            .exceptionHandling(ex ->
+                ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+            )
+
+            // 🔥 MOST IMPORTANT LINE
+            .addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
 
+    // 🔐 Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // 🔑 Authentication Manager
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 }
