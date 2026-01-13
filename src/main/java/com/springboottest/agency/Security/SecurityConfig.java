@@ -32,51 +32,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            // ❌ Disable CSRF (JWT = Stateless)
-            .csrf(csrf -> csrf.disable())
-
-            // ❌ Disable session (JWT = Stateless)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-
-            // ✅ Authorization rules
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/auth/**",
-                    "/user/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-
-            // ❗ Custom 401 handler
-            .exceptionHandling(ex ->
-                ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)
-            )
-
-            // 🔥 MOST IMPORTANT LINE
-            .addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-            );
-
-        return http.build();
-    }
-
-    // 🔐 Password encoder
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    // 🔑 Authentication Manager
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config
-    ) throws Exception {
-        return config.getAuthenticationManager();
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }

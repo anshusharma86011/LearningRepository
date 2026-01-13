@@ -33,7 +33,7 @@ public class InventoryController {
     @Autowired
     private InventoryService inventoryService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @GetMapping("/product")
     public List<ProductUser> getAllProduct() {
     return inventoryService.getAll();
