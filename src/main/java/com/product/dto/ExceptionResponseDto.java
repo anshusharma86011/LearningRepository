@@ -1,0 +1,20 @@
+package com.product.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
+
+
+
+@Data
+@AllArgsConstructor
+public class ExceptionResponseDto
+{
+   private String api;
+   private HttpStatus statuscode;
+   private String localmessage;
+   private LocalDateTime localDateTime;
+
+}
