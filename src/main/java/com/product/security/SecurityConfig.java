@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -28,15 +30,21 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> {
 
-                    request.requestMatchers( "/user/register").permitAll();
+                    request.requestMatchers( "/user/register","/user/login").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/api/**").permitAll();
                     request.anyRequest().authenticated();
-                }).httpBasic(Customizer.withDefaults());
+                }).httpBasic(Customizer.withDefaults())
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
 
@@ -68,7 +76,7 @@ public class SecurityConfig {
 public AuthenticationProvider authenticationProvider()
 {
   DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-  provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+  provider.setPasswordEncoder( passwordEncoder());
  return  provider;
 }
 @Bean
@@ -77,9 +85,5 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration c
   return   config.getAuthenticationManager();
 
 }
-
-
-
-
 
 }
